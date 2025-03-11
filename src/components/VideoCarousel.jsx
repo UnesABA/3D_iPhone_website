@@ -24,9 +24,15 @@ const VideoCarousel = () => {
   const [loadedData, setLoadedData] = useState([]) 
 
   useGSAP(() =>{
+    gsap.to("#slider", {
+      transform: `translateX(${-100 * videoId}%)`,
+      duration : 2,
+      ease     : "power2.inOut"
+    })
+
     gsap.to("#video",{
       scrollTrigger: {
-        trigger: "#video",
+        trigger      : "#video",
         toggleActions: "restart none none none"
       },
       onComplete: () =>{
@@ -44,7 +50,7 @@ const VideoCarousel = () => {
     if(loadedData.length > 3){
       if(!isPlaying){
         videoRef.current[videoId].pause()
-      } else{
+      }else{
         startPlay && videoRef.current[videoId].play()
       }
     }
@@ -58,7 +64,7 @@ const VideoCarousel = () => {
       let anim = gsap.to(span[videoId], {
         onUpdate: () =>{
            // get the progress of the video
-          const progress = math.ceil(anim.progress() * 100)
+          const progress = Math.ceil(anim.progress() * 100)
           if(progress != currentProgress){
             currentProgress = progress
             
@@ -69,12 +75,40 @@ const VideoCarousel = () => {
             })
 
             gsap.to(span[videoId],{
-              width: `${currentProgress} %`,
-              background: white
+              width          : `${currentProgress}%`,
+              backgroundColor: "white",
+            })
+          }
+        },
+        onComplete: () =>{
+          if(isPlaying) {
+            gsap.to(videoDivRef.current[videoId], {
+              width: "12px"
+            })
+            gsap.to(span[videoId], {
+              backgroungColor: "afafaf"
             })
           }
         }
       })
+
+      // restart the animation
+      if (videoId == 0) {
+        anim.restart()
+      }
+      
+      // how long the animation last : 
+      const aminUpdate = () =>{
+        anim.progress(
+          videoRef.current[videoId].currentTime / hightlightsSlides[videoId].videoDuration) 
+      }
+  
+      if (isPlaying) {
+        //ticker is used to update the ticker bar
+        gsap.ticker.add(aminUpdate)
+      }else{
+        gsap.ticker.remove(aminUpdate)
+      }
     }
   },[videoId, startPlay])
   
@@ -83,7 +117,7 @@ const VideoCarousel = () => {
       case "video-end":
         setVideo((pre) =>({
           ...pre,
-          isEnd: true,
+          isEnd  : true,
           videoId: i + 1
         }))
         break;
@@ -99,7 +133,7 @@ const VideoCarousel = () => {
         setVideo((pre) =>({
           ...pre,
           isLastVideo: false,
-          videoId: 0
+          videoId    : 0
         }))
         break;
         
@@ -108,7 +142,7 @@ const VideoCarousel = () => {
           ...pre, 
           isPlaying: !pre.isPlaying 
         }))
-      break;
+        break;
       
       case "pause":
         setVideo((pre) => ({ 
@@ -116,18 +150,16 @@ const VideoCarousel = () => {
           isPlaying: !pre.isPlaying 
         }))
         break;
-        
-        
-        
+
       default:
           return video
-          }
-          }
+    }
+  }
               
-    const handleLoadedMetadata = (i, e) => setLoadedData((pre) => [...pre, e])
+  const handleLoadedMetadata = (i, e) => setLoadedData((pre) => [...pre, e])
 
-    return (
-                <>
+  return (
+    <>
       <div className= "flex items-center">  
         {hightlightsSlides.map((list, i) =>(
           <div key={list.id} id= "slider" className= "sm:pr-20 pr-10">
@@ -138,7 +170,15 @@ const VideoCarousel = () => {
                   playsInline={true}
                   preload= "auto"
                   muted
+                  className= {`${
+                      list.id === 2 && "translate-x-44"}
+                      pointer-events-none
+                      `}
                   ref= {(el) => (videoRef.current[i] = el)}
+                  onEnded= {() =>{
+                    i !== 3 ? handleProcess("video-end", i)
+                            : handleProcess("video-last")
+                  }}
                   onPlay= {() =>{
                     setVideo((pre) =>({
                       ...pre,
@@ -183,7 +223,7 @@ const VideoCarousel = () => {
           alt= {isLastVideo ? "replay"  : !isPlaying ? "play"  : "pause"}  
           onClick= {isLastVideo ? () => handleProcess("video-reset") 
                                 : !isPlaying ? () => handleProcess("play")
-                                             : () => handleProcess("pause")} 
+                                            : () => handleProcess("pause")} 
           />
         </button>
       </div>
