@@ -4,13 +4,14 @@ import ModelView            from './ModelView'
 import { useRef, useState } from 'react'
 import {yellowImg}          from "../utils"
 import * as THREE           from "three"
+import { Canvas }           from "@react-three/fiber"
 import {View}               from "@react-three/drei"
 import {models, sizes}      from "../constants/index"
 
 const Model = () => {
   const [size, setSize]   = useState("small")
   const [model, setModel] = useState({
-    title: "iphone 15 Pro in Natural Titanium",
+    title: "iPhone 15 Pro in Natural Titanium",
     color: ["#8F8A81", "#FFE7B9", "6F6C64"],
     img  : yellowImg, 
   })
@@ -62,7 +63,7 @@ const Model = () => {
               size            = {size}
             />
 
-            <canvas
+            <Canvas
               className= "w-full h-full"
               style= {{
                 position: "fixed",
@@ -72,11 +73,11 @@ const Model = () => {
                 left    : 0,
                 overflow: "hidden"
               }} 
-              // when we want to interact with the model 
+              // to interact with the model 
               eventSource= {document.getElementById("root")} 
             >
               <View.Port />
-            </canvas>
+            </Canvas>
           </div>
           <div className= "mx-auto w-full">
             <p className= "text-sm font-light text-center mb-5">{model.title}</p>
